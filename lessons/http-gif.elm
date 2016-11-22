@@ -1,12 +1,11 @@
 import Html exposing (..)
-import Html.App as App
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
-import Json.Decode as Json
-import Task
+import Json.Decode as Decode
 
-main = App.program { init = init, view = view, update = update, subscriptions = subscriptions }
+main : Program Never Model Msg
+main = Html.program { init = init "cats", view = view, update = update, subscriptions = subscriptions }
 
 -- MODEL
 
@@ -16,25 +15,24 @@ type alias Model =
   , gifUrl: String
   }
 
-init : (Model, Cmd Msg)
-init =
-  (Model "cats" "waiting.gif", Cmd.none)
+init : String -> (Model, Cmd Msg)
+init topic =
+  (Model topic "waiting.gif", getRandomGif topic)
 
 -- UPDATE
 
 type Msg
   = MorePlease
-  | FetchSucceed String
-  | FetchFail Http.Error
+  | NewGif (Result Http.Error String)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     MorePlease ->
       (model, getRandomGif model.topic)
-    FetchSucceed newUrl ->
-      (Model model.topic newUrl, Cmd.none)
-    FetchFail _ ->
+    NewGif (Ok newUrl) ->
+      ({model | gifUrl = newUrl}, Cmd.none)
+    NewGif (Err _) ->
       (model, Cmd.none)
 
 -- VIEW
@@ -60,8 +58,8 @@ getRandomGif topic =
   let url =
     "https://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=" ++ topic
   in
-    Task.perform FetchFail FetchSucceed (Http.get decodeGifUrl url)
+    Http.send NewGif (Http.get url decodeGifUrl)
 
-decodeGifUrl : Json.Decoder String
+decodeGifUrl : Decode.Decoder String
 decodeGifUrl =
-  Json.at ["data", "image_url"] Json.string
+  Decode.at ["data", "image_url"] Decode.string

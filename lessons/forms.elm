@@ -1,13 +1,12 @@
 import Char exposing (..)
 
 import Html exposing (..)
-import Html.App as App
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 
 import String
 
-main = App.beginnerProgram { model = model, view = view, update = update }
+main = Html.beginnerProgram { model = model, view = view, update = update }
 
 
 -- Model
@@ -49,10 +48,10 @@ update msg model =
 view: Model -> Html Msg
 view model =
   div [] [
-    input [ type' "text", placeholder "Name", onInput Name ] [],
-    input [ type' "number", placeholder "Age", onInput Age ] [],
-    input [ type' "password", placeholder "Password", onInput Password ] [],
-    input [ type' "password", placeholder "Confirm Password", onInput PasswordAgain ] [],
+    input [ type_ "text", placeholder "Name", onInput Name ] [],
+    input [ type_ "number", placeholder "Age", onInput Age ] [],
+    input [ type_ "password", placeholder "Password", onInput Password ] [],
+    input [ type_ "password", placeholder "Confirm Password", onInput PasswordAgain ] [],
     viewValidation model
   ]
 
